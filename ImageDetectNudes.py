@@ -6,8 +6,7 @@ from tensorflow.keras.applications.vgg16 import preprocess_input
 from tensorflow.keras.preprocessing import image
 import logging
 
-from tensorflow.keras.models import load_model
-
+# Load the pretrained and fine-tuned VGG16 model
 model = load_model('nudes_detector_model.h5')
 
 def is_pornographic(img_path):
@@ -17,8 +16,8 @@ def is_pornographic(img_path):
     x = preprocess_input(x)
 
     prediction = model.predict(x)
-    logging.info(f"Predição para {img_path}: {prediction}")
-    return prediction[0][0] > 0.5  # Ajuste o limiar conforme necessário
+    logging.info(f"Prediction for {img_path}: {prediction}")
+    return prediction[0][0] > 0.5  # Adjust threshold as needed
 
 def check_folder_for_pornography(folder_path):
     porn_images = []
@@ -41,14 +40,14 @@ def compare_images(img1_path, img2_path):
     matches = bf.match(des1, des2)
     matches = sorted(matches, key=lambda x: x.distance)
 
-    logging.info(f"Comparação entre {img1_path} e {img2_path}: {len(matches)} correspondências")
+    logging.info(f"Comparison between {img1_path} and {img2_path}: {len(matches)} matches")
     return len(matches)
 
 def find_matches(porn_images, reference_images):
     matches = []
     for porn_image in porn_images:
         for ref_image in reference_images:
-            if compare_images(porn_image, ref_image) > 10:  # ajuste o valor conforme necessário
+            if compare_images(porn_image, ref_image) > 10:  # adjust the value as needed
                 matches.append(porn_image)
                 break
     return matches
@@ -56,21 +55,21 @@ def find_matches(porn_images, reference_images):
 logging.basicConfig(filename='output.log', level=logging.INFO)
 
 def main(reference_images, folder_path):
-    logging.info(f"Verificando imagens de referência: {reference_images}")
+    logging.info(f"Checking reference images: {reference_images}")
     for ref_image in reference_images:
         if not os.path.exists(ref_image):
-            logging.error(f"Imagem de referência não encontrada: {ref_image}")
+            logging.error(f"Reference image not found: {ref_image}")
         else:
-            logging.info(f"Imagem de referência encontrada: {ref_image}")
+            logging.info(f"Reference image found: {ref_image}")
 
     porn_images = check_folder_for_pornography(folder_path)
-    logging.info(f"Imagens pornográficas encontradas: {porn_images}")
+    logging.info(f"Pornographic images found: {porn_images}")
     matches = find_matches(porn_images, reference_images)
-    logging.info("Imagens que correspondem aos padrões de referência: %s", matches)
+    logging.info("Images matching reference patterns: %s", matches)
     return matches
 
-# Uso
-reference_images = [ 'E:\\reference\\imagem1.jpg', 'E:\\reference\\imagem2.jpg']
-folder_path = 'C:\\Nudes'
+# Usage
+reference_images = ['path_to_reference_image1.jpg', 'path_to_reference_image2.jpg']  # Add reference image paths
+folder_path = 'path_to_folder_to_check'  # Add the folder path to check
 matching_images = main(reference_images, folder_path)
-print("Imagens que correspondem aos padrões de referência:", matching_images)
+print("Images matching reference patterns:", matching_images)
